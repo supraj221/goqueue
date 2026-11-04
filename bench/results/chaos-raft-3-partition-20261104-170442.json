@@ -1,0 +1,108 @@
+{
+  "scenario": "chaos-raft-3-partition",
+  "backend": "raft-3-partition",
+  "timestamp": "2026-11-04T22:04:42Z",
+  "goos": "windows",
+  "goarch": "amd64",
+  "num_cpu": 12,
+  "go_version": "go1.27.3",
+  "command": "goqueue-bench chaos --nodes 3 --duration 60s --kill-every 10s --partition --backend-label raft-3-partition",
+  "params": {
+    "batch": 16,
+    "duration": "1m0s",
+    "fault": "freeze",
+    "fault_every": "10s",
+    "lease": "5s",
+    "nodes": 3,
+    "payload_bytes": 1024,
+    "producers": 16,
+    "restart_delay": "5s",
+    "retention": "30s",
+    "snapshot_threshold": 2000,
+    "workers": 32
+  },
+  "load_seconds": 60.2458184,
+  "drain_seconds": 2.86994,
+  "enqueued": 71582,
+  "enqueue_errors": 0,
+  "enqueue_per_sec": 1188.165451164325,
+  "processed_total": 71582,
+  "processed_during_load": 62770,
+  "processed_per_sec_during_load": 1041.8980381881574,
+  "processed_per_sec_overall": 1134.1383168739678,
+  "dequeue_errors": 0,
+  "ack_lease_lost": 1089,
+  "enqueue_latency": {
+    "count": 71582,
+    "p50_ms": 5.7853,
+    "p95_ms": 9.5404,
+    "p99_ms": 218.5798,
+    "max_ms": 3024.6822,
+    "mean_ms": 13.446813552289681
+  },
+  "queue_wait": {
+    "count": 71582,
+    "p50_ms": 3892.1709,
+    "p95_ms": 9973.4926,
+    "p99_ms": 11163.8026,
+    "max_ms": 11651.8597,
+    "mean_ms": 3984.2008452907153
+  },
+  "end_to_end": {
+    "count": 71582,
+    "p50_ms": 4024.0124,
+    "p95_ms": 10328.8702,
+    "p99_ms": 11253.8153,
+    "max_ms": 11784.5153,
+    "mean_ms": 4160.286630700455
+  },
+  "verify": {
+    "acknowledged_enqueues": 71582,
+    "processed_by_workers": 71582,
+    "recovered_by_get": 0,
+    "lost_jobs": 0,
+    "duplicate_deliveries_jobs": 1088,
+    "duplicate_deliveries_extra": 1088,
+    "delivered_not_acknowledged": 0
+  },
+  "chaos": {
+    "nodes": 3,
+    "kill_every": "10s",
+    "kills": 5,
+    "restarts": 5,
+    "failovers": [
+      {
+        "killed_node": "n1",
+        "killed_at": "17:03:49.537",
+        "failover_ms": 2963.8508
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:03:59.537",
+        "failover_ms": 3016.9266
+      },
+      {
+        "killed_node": "n3",
+        "killed_at": "17:04:09.538",
+        "failover_ms": 2782.9899
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:04:19.537",
+        "failover_ms": 2955.3769
+      },
+      {
+        "killed_node": "n3",
+        "killed_at": "17:04:29.537",
+        "failover_ms": 2983.1492
+      }
+    ],
+    "failover_p50_ms": 2963.8508,
+    "failover_max_ms": 3016.9266,
+    "longest_enqueue_gap_ms": 3021.2704,
+    "unrecovered_kills": 0,
+    "partition_supported": true,
+    "partition_note": "leader frozen with NtSuspendProcess/SIGSTOP for the restart delay, then resumed (counted under kills)"
+  },
+  "notes": "Final cluster status:\n\n- n1 role=leader term=6 commit=152657 applied=152657\n- n2 role=follower term=6 commit=152657 applied=152657\n- n3 role=follower term=6 commit=152657 applied=152488"
+}

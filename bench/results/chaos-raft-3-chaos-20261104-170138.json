@@ -1,0 +1,138 @@
+{
+  "scenario": "chaos-raft-3-chaos",
+  "backend": "raft-3-chaos",
+  "timestamp": "2026-11-04T22:01:37Z",
+  "goos": "windows",
+  "goarch": "amd64",
+  "num_cpu": 12,
+  "go_version": "go1.27.3",
+  "command": "goqueue-bench chaos --nodes 3 --duration 120s --kill-every 10s --backend-label raft-3-chaos",
+  "params": {
+    "batch": 16,
+    "duration": "2m0s",
+    "fault": "kill",
+    "fault_every": "10s",
+    "lease": "5s",
+    "nodes": 3,
+    "payload_bytes": 1024,
+    "producers": 16,
+    "restart_delay": "2s",
+    "retention": "30s",
+    "snapshot_threshold": 2000,
+    "workers": 32
+  },
+  "load_seconds": 120.0033133,
+  "drain_seconds": 0.1005054,
+  "enqueued": 171228,
+  "enqueue_errors": 0,
+  "enqueue_per_sec": 1426.8606031896954,
+  "processed_total": 171228,
+  "processed_during_load": 171085,
+  "processed_per_sec_during_load": 1425.66896942503,
+  "processed_per_sec_overall": 1425.666576245173,
+  "dequeue_errors": 0,
+  "ack_lease_lost": 136,
+  "enqueue_latency": {
+    "count": 171228,
+    "p50_ms": 4.9931,
+    "p95_ms": 13.1477,
+    "p99_ms": 240.5932,
+    "max_ms": 1339.943,
+    "mean_ms": 11.198782066017241
+  },
+  "queue_wait": {
+    "count": 171228,
+    "p50_ms": 8.97,
+    "p95_ms": 30.4113,
+    "p99_ms": 317.7106,
+    "max_ms": 5397.7039,
+    "mean_ms": 24.035970999486064
+  },
+  "end_to_end": {
+    "count": 171228,
+    "p50_ms": 58.4765,
+    "p95_ms": 386.9648,
+    "p99_ms": 658.2519,
+    "max_ms": 6015.0328,
+    "mean_ms": 115.34581632268088
+  },
+  "verify": {
+    "acknowledged_enqueues": 171228,
+    "processed_by_workers": 171228,
+    "recovered_by_get": 0,
+    "lost_jobs": 0,
+    "duplicate_deliveries_jobs": 0,
+    "duplicate_deliveries_extra": 0,
+    "delivered_not_acknowledged": 0
+  },
+  "chaos": {
+    "nodes": 3,
+    "kill_every": "10s",
+    "kills": 11,
+    "restarts": 11,
+    "failovers": [
+      {
+        "killed_node": "n2",
+        "killed_at": "16:59:47.781",
+        "failover_ms": 0.5327
+      },
+      {
+        "killed_node": "n3",
+        "killed_at": "16:59:57.782",
+        "failover_ms": 333.7048
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:00:07.784",
+        "failover_ms": 199.533
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:00:17.783",
+        "failover_ms": 950.0937
+      },
+      {
+        "killed_node": "n3",
+        "killed_at": "17:00:27.781",
+        "failover_ms": 192.9471
+      },
+      {
+        "killed_node": "n1",
+        "killed_at": "17:00:37.782",
+        "failover_ms": 340.9883
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:00:47.782",
+        "failover_ms": 336.9815
+      },
+      {
+        "killed_node": "n1",
+        "killed_at": "17:00:57.782",
+        "failover_ms": 167.5713
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:01:07.781",
+        "failover_ms": 341.6622
+      },
+      {
+        "killed_node": "n3",
+        "killed_at": "17:01:17.783",
+        "failover_ms": 332.6275
+      },
+      {
+        "killed_node": "n2",
+        "killed_at": "17:01:27.782",
+        "failover_ms": 329.0589
+      }
+    ],
+    "failover_p50_ms": 332.6275,
+    "failover_max_ms": 950.0937,
+    "longest_enqueue_gap_ms": 1315.9131,
+    "unrecovered_kills": 0,
+    "partition_supported": false,
+    "partition_note": "not run (re-run with --partition to freeze the leader instead of killing it)"
+  },
+  "notes": "Final cluster status:\n\n- n1 role=follower term=17 commit=387361 applied=387361\n- n2 role=follower term=17 commit=387361 applied=387361\n- n3 role=leader term=17 commit=387361 applied=387361"
+}

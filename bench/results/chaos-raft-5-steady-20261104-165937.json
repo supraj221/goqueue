@@ -1,0 +1,82 @@
+{
+  "scenario": "chaos-raft-5-steady",
+  "backend": "raft-5-steady",
+  "timestamp": "2026-11-04T21:59:37Z",
+  "goos": "windows",
+  "goarch": "amd64",
+  "num_cpu": 12,
+  "go_version": "go1.27.3",
+  "command": "goqueue-bench chaos --nodes 5 --duration 30s --kill-every 10m --backend-label raft-5-steady",
+  "params": {
+    "batch": 16,
+    "duration": "30s",
+    "fault": "kill",
+    "fault_every": "10m0s",
+    "lease": "5s",
+    "nodes": 5,
+    "payload_bytes": 1024,
+    "producers": 16,
+    "restart_delay": "2s",
+    "retention": "30s",
+    "snapshot_threshold": 2000,
+    "workers": 32
+  },
+  "load_seconds": 30.0105957,
+  "drain_seconds": 0.100543,
+  "enqueued": 23280,
+  "enqueue_errors": 0,
+  "enqueue_per_sec": 775.7260213265276,
+  "processed_total": 23280,
+  "processed_during_load": 23134,
+  "processed_per_sec_during_load": 770.8610729109919,
+  "processed_per_sec_overall": 773.1358229903142,
+  "dequeue_errors": 0,
+  "ack_lease_lost": 16,
+  "enqueue_latency": {
+    "count": 23280,
+    "p50_ms": 5.3436,
+    "p95_ms": 48.9152,
+    "p99_ms": 147.4175,
+    "max_ms": 1150.0871,
+    "mean_ms": 20.607323646907215
+  },
+  "queue_wait": {
+    "count": 23280,
+    "p50_ms": 9.6545,
+    "p95_ms": 90.4003,
+    "p99_ms": 302.6846,
+    "max_ms": 5095.6484,
+    "mean_ms": 40.238044742268045
+  },
+  "end_to_end": {
+    "count": 23280,
+    "p50_ms": 77.39,
+    "p95_ms": 792.0569,
+    "p99_ms": 1531.88,
+    "max_ms": 6178.7264,
+    "mean_ms": 212.75809539089346
+  },
+  "verify": {
+    "acknowledged_enqueues": 23280,
+    "processed_by_workers": 23280,
+    "recovered_by_get": 0,
+    "lost_jobs": 0,
+    "duplicate_deliveries_jobs": 0,
+    "duplicate_deliveries_extra": 0,
+    "delivered_not_acknowledged": 0
+  },
+  "chaos": {
+    "nodes": 5,
+    "kill_every": "10m0s",
+    "kills": 0,
+    "restarts": 0,
+    "failovers": null,
+    "failover_p50_ms": 0,
+    "failover_max_ms": 0,
+    "longest_enqueue_gap_ms": 1130.371,
+    "unrecovered_kills": 0,
+    "partition_supported": false,
+    "partition_note": "not run (re-run with --partition to freeze the leader instead of killing it)"
+  },
+  "notes": "Final cluster status:\n\n- n1 role=follower term=5 commit=52499 applied=52499\n- n2 role=follower term=5 commit=52500 applied=52500\n- n3 role=leader term=5 commit=52500 applied=52500\n- n4 role=follower term=5 commit=52500 applied=52500\n- n5 role=follower term=5 commit=52500 applied=52500"
+}
