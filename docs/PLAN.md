@@ -23,7 +23,8 @@ resume bullets.
 ### Goals
 - **At-least-once delivery** with **fencing tokens**, so a worker whose lease
   expired cannot ack or nack a job another worker now owns.
-- **Exactly-once enqueue** through idempotency keys.
+- **Idempotent enqueue** through idempotency keys, with a deduplication window
+  equal to the job's lifetime plus the finished-job retention.
 - Leases with heartbeats, automatic reclaim of jobs from crashed workers,
   exponential backoff with jitter, max attempts, and a dead-letter state.
 - Priorities, delayed or scheduled jobs (`run_at`), and multiple named queues.

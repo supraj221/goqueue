@@ -37,7 +37,7 @@ The commands are `enqueue`, `claim`, `heartbeat`, `ack`, `nack`, `expire_leases`
 ### What is guaranteed
 
 - **At-least-once delivery.** A job that was acknowledged at enqueue is delivered to a worker until a worker acks it or its attempts run out (then it is `dead`, which is visible and inspectable, not silently dropped). If a worker crashes, stalls, or loses the network, its lease expires and the job becomes claimable again.
-- **Exactly-once enqueue**, scoped to an idempotency key. Two enqueues with the same key create one job; the second returns the first job with `Created=false`.
+- **Idempotent enqueue**, scoped to an idempotency key and a time window. Two enqueues with the same key create one job; the second returns the first job with `Created=false`. The key index is part of the replicated state, so deduplication survives leader failover and client retries against a new leader. On the Raft backend the window lasts while the job is pending or running, plus the finished-job retention (default 1 hour; see the end of this section). On Postgres, a unique index enforces it for as long as the row exists, and rows are never deleted.
 - **Fenced completion.** Every claim increments `Attempts` and sets `LeaseToken = Attempts`. `Heartbeat`, `Ack` and `Nack` must present the current token or get `ErrLeaseLost`. A worker whose lease expired and whose job was handed to someone else cannot ack, nack, or extend it.
 - **No acknowledged-job loss across leader failure.** An enqueue is acknowledged only after a majority has fsynced it. Any new leader must contain every committed entry (Raft's election restriction), so an acknowledged job survives any single node failure in a 3-node cluster (any two in a 5-node cluster).
 

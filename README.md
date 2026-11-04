@@ -13,8 +13,8 @@ conformance suite, for comparison.
 |---|---|
 | **Leader killed 11 times in 2 minutes under load** | **0 of 171,228 acknowledged jobs lost** |
 | Failover (kill to first successful write) | **333 ms p50**, 3-node cluster |
-| Raft commit throughput, in memory | ~100k commits/s |
-| Delivery | at-least-once with fencing tokens; exactly-once enqueue via idempotency keys |
+| Delivery | at-least-once with fencing tokens |
+| Enqueue | idempotent per key; survives failover; window = job lifetime + retention (default 1 h) |
 
 See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for method, caveats, and every number.
 
