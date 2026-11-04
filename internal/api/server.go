@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/supraj221/goqueue/internal/broker"
 )
 
@@ -23,6 +25,10 @@ type Options struct {
 	// Extra handlers mounted on the same mux, for example the raft RPC
 	// handlers under "/raft/". Keys are mux patterns.
 	Extra map[string]http.Handler
+	// Registry receives the API's collectors and is served at /metrics.
+	// Callers may register their own collectors on it (raft metrics). If nil,
+	// the server creates its own.
+	Registry *prometheus.Registry
 }
 
 // Server is the HTTP API.
