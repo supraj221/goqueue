@@ -131,16 +131,16 @@ scan:
 	}
 	if good < len(data) {
 		if err := f.Truncate(int64(good)); err != nil {
-			f.Close()
+			_ = f.Close()
 			return err
 		}
 		if err := f.Sync(); err != nil {
-			f.Close()
+			_ = f.Close()
 			return err
 		}
 	}
 	if _, err := f.Seek(int64(good), 0); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	fs.wal = f
@@ -240,7 +240,7 @@ func (fs *FileStorage) rewriteWAL(ents []LogEntry) error {
 		return err
 	}
 	if _, err := f.Seek(0, 2); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	fs.wal = f
@@ -267,11 +267,11 @@ func writeFileSync(path string, data []byte) error {
 		return err
 	}
 	if _, err := f.Write(data); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	if err := f.Sync(); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	return f.Close()
@@ -327,5 +327,5 @@ func syncDir(dir string) {
 		return
 	}
 	_ = d.Sync()
-	d.Close()
+	_ = d.Close()
 }

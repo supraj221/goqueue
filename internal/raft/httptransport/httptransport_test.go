@@ -43,7 +43,7 @@ func TestThreeNodeClusterOverHTTP(t *testing.T) {
 	urls := map[string]string{}
 	for i, id := range ids {
 		muxes[i] = http.NewServeMux()
-		muxes[i].HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, "ok") })
+		muxes[i].HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, "ok") })
 		srv := httptest.NewServer(muxes[i])
 		t.Cleanup(srv.Close)
 		urls[id] = srv.URL

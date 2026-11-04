@@ -15,7 +15,7 @@ func dropSchema(t *testing.T, dsn, schema string) {
 		t.Logf("drop schema: %v", err)
 		return
 	}
-	defer conn.Close(ctx)
+	defer func() { _ = conn.Close(ctx) }()
 	if _, err := conn.Exec(ctx, "DROP SCHEMA "+pgx.Identifier{schema}.Sanitize()+" CASCADE"); err != nil {
 		t.Logf("drop schema: %v", err)
 	}

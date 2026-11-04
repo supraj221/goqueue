@@ -75,7 +75,7 @@ func TestConformanceFake(t *testing.T) {
 	brokertest.Run(t, func(t *testing.T) broker.Broker {
 		q := fsm.New()
 		b := New(newFake(q), q, Options{ReaperInterval: 50 * time.Millisecond})
-		t.Cleanup(func() { b.Close() })
+		t.Cleanup(func() { _ = b.Close() })
 		return b
 	})
 }
@@ -84,7 +84,7 @@ func TestNotLeaderMapping(t *testing.T) {
 	q := fsm.New()
 	f := newFake(q)
 	b := New(f, q, Options{PeerAddrs: map[string]string{"n1": "http://n1"}})
-	defer b.Close()
+	defer func() { _ = b.Close() }()
 	f.setLeader(false)
 	_, err := b.Enqueue(context.Background(), broker.EnqueueRequest{Queue: "q", Type: "t"})
 	var nl *broker.NotLeaderError
@@ -102,7 +102,7 @@ func TestNotLeaderMapping(t *testing.T) {
 func TestMetrics(t *testing.T) {
 	q := fsm.New()
 	b := New(newFake(q), q, Options{})
-	defer b.Close()
+	defer func() { _ = b.Close() }()
 	reg := prometheus.NewRegistry()
 	if err := b.RegisterMetrics(reg); err != nil {
 		t.Fatal(err)

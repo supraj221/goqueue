@@ -74,7 +74,7 @@ func (t *Transport) post(ctx context.Context, to, route string, req, resp any) e
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		msg, _ := io.ReadAll(io.LimitReader(res.Body, 512))
 		return fmt.Errorf("httptransport: %s %s: %s: %s", to, route, res.Status, bytes.TrimSpace(msg))

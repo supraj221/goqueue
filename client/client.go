@@ -256,7 +256,7 @@ func (c *Client) once(ctx context.Context, method, u string, payload []byte, out
 		}
 		return 0, true, fmt.Errorf("%w: %v", broker.ErrUnavailable, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	data, err := io.ReadAll(io.LimitReader(resp.Body, 32<<20))
 	if err != nil {
 		if ctx.Err() != nil {

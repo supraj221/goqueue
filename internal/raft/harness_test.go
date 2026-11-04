@@ -239,7 +239,7 @@ func (c *cluster) crash(i int) {
 	c.net.Unregister(c.ids[i])
 	node.Stop()
 	if c.dirs != nil {
-		c.stores[i].Close()
+		_ = c.stores[i].Close()
 		c.stores[i] = nil
 	}
 }
@@ -271,7 +271,7 @@ func (c *cluster) cleanup() {
 	if c.dirs != nil {
 		for i, st := range c.stores {
 			if st != nil {
-				st.Close()
+				_ = st.Close()
 				c.stores[i] = nil
 			}
 		}
@@ -550,7 +550,8 @@ func (c *cluster) proposeAsync(i int, cmd string, timeout time.Duration) {
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		node.Propose(ctx, []byte(cmd))
+		// The proposal may legitimately fail (leader loss, timeout) during chaos.
+		_, _, _ = node.Propose(ctx, []byte(cmd))
 	}()
 }
 

@@ -66,7 +66,9 @@ func cmdLoad(ctx context.Context, args []string) error {
 	urls := fs.String("urls", "http://127.0.0.1:8080", "comma-separated server base URLs")
 	label := fs.String("backend-label", "pg", "label for the backend under test (pg, raft-3, ...)")
 	out := fs.String("out", "bench/results", "results directory")
-	fs.Parse(args)
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
 	for _, u := range strings.Split(*urls, ",") {
 		if u = strings.TrimSpace(u); u != "" {
 			c.urls = append(c.urls, strings.TrimRight(u, "/"))

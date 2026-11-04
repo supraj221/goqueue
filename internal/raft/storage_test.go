@@ -32,7 +32,7 @@ var factories = []storageFactory{
 		var cur *FileStorage
 		open := func() Storage {
 			if cur != nil {
-				cur.Close()
+				_ = cur.Close()
 			}
 			fs, err := NewFileStorage(dir)
 			if err != nil {
@@ -43,7 +43,7 @@ var factories = []storageFactory{
 		}
 		t.Cleanup(func() {
 			if cur != nil {
-				cur.Close()
+				_ = cur.Close()
 			}
 		})
 		return open(), open
@@ -227,7 +227,7 @@ func TestFileStorageCorruption(t *testing.T) {
 			if err := fs.Append(ents); err != nil {
 				t.Fatal(err)
 			}
-			fs.Close()
+			_ = fs.Close()
 
 			walPath := filepath.Join(dir, walName)
 			data, err := os.ReadFile(walPath)
@@ -253,12 +253,12 @@ func TestFileStorageCorruption(t *testing.T) {
 			if err := fs.Append(mkEntries(tc.wantLast+1, tc.wantLast+2, 7)); err != nil {
 				t.Fatal(err)
 			}
-			fs.Close()
+			_ = fs.Close()
 			fs, err = NewFileStorage(dir)
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer fs.Close()
+			defer func() { _ = fs.Close() }()
 			_, last2, _ := dumpLog(t, fs)
 			if last2 != tc.wantLast+2 {
 				t.Fatalf("after append and reopen last = %d, want %d", last2, tc.wantLast+2)
@@ -278,14 +278,22 @@ func TestFileStorageCorruptHardStateOrSnapshotIsError(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			fs.SaveHardState(HardState{Term: 3, VotedFor: "n1"})
-			fs.Append(mkEntries(1, 2, 1))
-			fs.SaveSnapshot(Snapshot{LastIndex: 2, LastTerm: 1, Data: []byte("x")})
-			fs.Close()
+			if err := fs.SaveHardState(HardState{Term: 3, VotedFor: "n1"}); err != nil {
+				t.Fatal(err)
+			}
+			if err := fs.Append(mkEntries(1, 2, 1)); err != nil {
+				t.Fatal(err)
+			}
+			if err := fs.SaveSnapshot(Snapshot{LastIndex: 2, LastTerm: 1, Data: []byte("x")}); err != nil {
+				t.Fatal(err)
+			}
+			_ = fs.Close()
 			p := filepath.Join(dir, name)
 			data, _ := os.ReadFile(p)
 			data[len(data)-2] ^= 0xff
-			os.WriteFile(p, data, 0o644)
+			if err := os.WriteFile(p, data, 0o644); err != nil {
+				t.Fatal(err)
+			}
 			if _, err := NewFileStorage(dir); err == nil {
 				t.Fatal("corrupt file should be reported, not silently ignored")
 			}
@@ -301,8 +309,10 @@ func TestFileStorageCrashDuringCompaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fs.Append(mkEntries(1, 10, 1))
-	fs.Close()
+	if err := fs.Append(mkEntries(1, 10, 1)); err != nil {
+		t.Fatal(err)
+	}
+	_ = fs.Close()
 	// Write only the snapshot file, as if we crashed before the WAL rewrite.
 	if err := writeJSONFile(filepath.Join(dir, snapshotName), Snapshot{LastIndex: 6, LastTerm: 1, Data: []byte("s")}); err != nil {
 		t.Fatal(err)
@@ -311,7 +321,7 @@ func TestFileStorageCrashDuringCompaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer fs.Close()
+	defer func() { _ = fs.Close() }()
 	first, last, ents := dumpLog(t, fs)
 	if first != 7 || last != 10 || len(ents) != 4 || ents[0].Index != 7 {
 		t.Fatalf("first/last/len = %d/%d/%d, want 7/10/4", first, last, len(ents))

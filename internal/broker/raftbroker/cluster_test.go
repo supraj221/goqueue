@@ -56,7 +56,7 @@ func newTestCluster(t *testing.T) *testCluster {
 	}
 	t.Cleanup(func() {
 		for _, b := range c.brokers {
-			b.Close()
+			_ = b.Close()
 		}
 		for _, n := range c.nodes {
 			n.Stop()

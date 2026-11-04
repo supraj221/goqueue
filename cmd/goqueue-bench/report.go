@@ -102,11 +102,7 @@ func (r *Report) fill(s *loadState, v verifyResult) {
 	r.EnqueueLatency = summarize(s.enqLat.all())
 	r.QueueWait = summarize(s.qwait.all())
 	r.EndToEnd = summarize(s.e2e.all())
-	r.Verify = Verify{
-		Acknowledged: v.Acknowledged, Processed: v.Processed, RecoveredByGet: v.RecoveredByGet,
-		Lost: v.Lost, LostStates: v.LostStates, LostIDs: v.LostIDs,
-		DuplicateJobs: v.DuplicateJobs, ExtraDeliveries: v.ExtraDeliveries, DeliveredUnknown: v.DeliveredUnknown,
-	}
+	r.Verify = Verify(v)
 }
 
 // write saves <dir>/<scenario>-<timestamp>.{json,md} and returns the base path.

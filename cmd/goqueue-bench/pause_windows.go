@@ -23,7 +23,7 @@ func withHandle(pid int, p *syscall.LazyProc) error {
 	if h == 0 {
 		return fmt.Errorf("OpenProcess(%d): %v", pid, err)
 	}
-	defer procClose.Call(h)
+	defer func() { _, _, _ = procClose.Call(h) }()
 	if r, _, _ := p.Call(h); r != 0 {
 		return fmt.Errorf("%s status 0x%x", p.Name, r)
 	}

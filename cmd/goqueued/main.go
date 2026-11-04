@@ -98,7 +98,7 @@ func runPostgres(ctx context.Context, c config, log *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("postgres: %w", err)
 	}
-	defer b.Close()
+	defer func() { _ = b.Close() }()
 	srv := api.NewServer(b, api.Options{Logger: log, Registry: newRegistry()})
 	log.Info("goqueued listening", "backend", "postgres", "addr", c.httpAddr)
 	return srv.Serve(ctx, c.httpAddr)
@@ -145,7 +145,11 @@ func runRaft(ctx context.Context, c config, log *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("storage: %w", err)
 	}
-	defer store.Close()
+	defer func() {
+		if err := store.Close(); err != nil {
+			log.Error("closing raft storage", "err", err)
+		}
+	}()
 
 	q := fsm.New()
 	tr := httptransport.New(peers, c.rpcTimeout)
@@ -185,7 +189,7 @@ func runRaft(ctx context.Context, c config, log *slog.Logger) error {
 	serveErr := srv.Serve(ctx, c.httpAddr)
 
 	log.Info("shutting down")
-	b.Close()
+	_ = b.Close()
 	node.Stop()
 	if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
 		return serveErr

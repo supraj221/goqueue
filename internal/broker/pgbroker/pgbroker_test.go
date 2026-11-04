@@ -39,7 +39,7 @@ func testBroker(tb testing.TB) *Broker {
 			tb.Logf("drop schema connect: %v", err)
 			return
 		}
-		defer conn.Close(ctx)
+		defer func() { _ = conn.Close(ctx) }()
 		if _, err := conn.Exec(ctx, "DROP SCHEMA "+pgx.Identifier{schema}.Sanitize()+" CASCADE"); err != nil {
 			tb.Logf("drop schema: %v", err)
 		}
@@ -102,7 +102,7 @@ func TestMigrationsIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer b2.Close()
+	defer func() { _ = b2.Close() }()
 	var n int
 	if err := b2.pool.QueryRow(context.Background(), "SELECT count(*) FROM schema_migrations").Scan(&n); err != nil || n != 1 {
 		t.Fatalf("schema_migrations rows = %d, err = %v", n, err)

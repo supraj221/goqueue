@@ -79,20 +79,20 @@ func (c *cluster) start(n *nodeProc) error {
 		return err
 	}
 	c.startedAt[n.id]++
-	fmt.Fprintf(lf, "---- start #%d at %s ----\n", c.startedAt[n.id], time.Now().Format(time.RFC3339Nano))
+	_, _ = fmt.Fprintf(lf, "---- start #%d at %s ----\n", c.startedAt[n.id], time.Now().Format(time.RFC3339Nano))
 	args := []string{"--backend=raft", "--http=" + n.addr, "--node-id=" + n.id,
 		"--peers=" + c.peers, "--data-dir=" + n.dir, fmt.Sprintf("--snapshot-threshold=%d", c.snapshot), "--log-level=warn"}
 	cmd := exec.Command(c.binary, append(args, c.extra...)...)
 	cmd.Stdout, cmd.Stderr = lf, lf
 	if err := cmd.Start(); err != nil {
-		lf.Close()
+		_ = lf.Close()
 		return err
 	}
 	n.cmd, n.running, n.paused = cmd, true, false
 	n.exited = make(chan struct{})
 	go func() {
 		_ = cmd.Wait()
-		lf.Close()
+		_ = lf.Close()
 		close(n.exited)
 	}()
 	return nil
@@ -165,7 +165,9 @@ func cmdChaos(ctx context.Context, args []string) error {
 	retention := fs.Duration("retention", 30*time.Second, "how long nodes keep finished jobs (bounds snapshot size; the server default is 1h)")
 	nodeArgs := fs.String("node-args", "", "extra space-separated flags passed to every goqueued")
 	label := fs.String("backend-label", "", "label for the report (default raft-N)")
-	fs.Parse(args)
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
 	if *label == "" {
 		*label = fmt.Sprintf("raft-%d", *nodes)
 	}
@@ -188,7 +190,7 @@ func cmdChaos(ctx context.Context, args []string) error {
 	defer func() {
 		cl.killAll()
 		if !*keep {
-			os.RemoveAll(root)
+			_ = os.RemoveAll(root)
 		} else {
 			fmt.Println("kept data and logs in", root)
 		}

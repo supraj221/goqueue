@@ -38,7 +38,7 @@ func (s *soloConsensus) LeaderChanges() <-chan bool { return s.ch }
 func TestLoadHarness(t *testing.T) {
 	q := fsm.New()
 	b := raftbroker.New(&soloConsensus{q: q, ch: make(chan bool)}, q, raftbroker.Options{})
-	defer b.Close()
+	defer func() { _ = b.Close() }()
 	ts := httptest.NewServer(api.NewServer(b, api.Options{}).Handler())
 	defer ts.Close()
 

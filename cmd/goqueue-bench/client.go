@@ -74,14 +74,6 @@ type apiResp struct {
 	Body   []byte
 }
 
-func (r apiResp) errCode() string {
-	var e struct {
-		Error string `json:"error"`
-	}
-	_ = json.Unmarshal(r.Body, &e)
-	return e.Error
-}
-
 // call performs a request, retrying until it gets a definitive answer (2xx or
 // a non-retryable 4xx) or ctx is done. attemptTimeout bounds each HTTP try.
 func (c *client) call(ctx context.Context, method, path string, body any, attemptTimeout time.Duration) (apiResp, error) {
@@ -121,7 +113,7 @@ func (c *client) call(ctx context.Context, method, path string, body any, attemp
 			continue
 		}
 		b, rerr := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		cancel()
 		if rerr != nil {
 			lastErr = rerr
@@ -275,7 +267,7 @@ func clusterStatusAt(ctx context.Context, hc *http.Client, base string) (cluster
 	if err != nil {
 		return clusterStatus{}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	var st clusterStatus
 	if resp.StatusCode != http.StatusOK {
 		return st, fmt.Errorf("status %d", resp.StatusCode)
