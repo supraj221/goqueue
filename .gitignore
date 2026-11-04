@@ -1,0 +1,15 @@
+# Binaries
+/bin/
+*.exe
+*.test
+*.out
+
+# Local data
+/data/
+/tmp/
+bench/results/*.tmp
+
+# Editors
+.idea/
+.vscode/
+.DS_Store
