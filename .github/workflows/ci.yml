@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: go vet
+        run: go vet ./...
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "gofmt needed on:"; echo "$unformatted"; exit 1
+          fi
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: goqueue
+          POSTGRES_PASSWORD: goqueue
+          POSTGRES_DB: goqueue
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U goqueue -d goqueue"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      GOQUEUE_PG_DSN: postgres://goqueue:goqueue@localhost:5432/goqueue?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: build
+        run: go build -o bin/ ./cmd/...
+      - name: test (race)
+        run: go test -race -count=1 ./...
+
+  raft:
+    # The consensus tests are timing sensitive; run them several times to catch flakes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: raft, fsm and raftbroker tests x3 (race)
+        run: go test -race -count=3 -timeout 20m ./internal/raft/... ./internal/fsm/... ./internal/broker/raftbroker/...
+
+  chaos-smoke:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go build -o bin/ ./cmd/...
+      - name: 3-node chaos, leader kill every 8s for 40s
+        run: ./bin/goqueue-bench chaos --nodes 3 --binary ./bin/goqueued --duration 40s --kill-every 8s --out bench/results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chaos-results
+          path: bench/results

@@ -1,0 +1,86 @@
+# Postgres 17, a postgres-backed goqueued (:8080), and a 3-node Raft cluster
+# (:8081, :8082, :8083). Raft RPCs and the client API share each node's port.
+name: goqueue
+
+x-raft-node: &raft-node
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: goqueue
+      POSTGRES_PASSWORD: goqueue
+      POSTGRES_DB: goqueue
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goqueue -d goqueue"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  goqueued-pg:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    command:
+      - --backend=postgres
+      - --http=:8080
+      - --pg-dsn=postgres://goqueue:goqueue@postgres:5432/goqueue?sslmode=disable
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  n1:
+    <<: *raft-node
+    command:
+      - --backend=raft
+      - --http=:8080
+      - --node-id=n1
+      - --peers=n1=http://n1:8080,n2=http://n2:8080,n3=http://n3:8080
+      - --data-dir=/data
+    ports:
+      - "8081:8080"
+    volumes:
+      - n1data:/data
+
+  n2:
+    <<: *raft-node
+    command:
+      - --backend=raft
+      - --http=:8080
+      - --node-id=n2
+      - --peers=n1=http://n1:8080,n2=http://n2:8080,n3=http://n3:8080
+      - --data-dir=/data
+    ports:
+      - "8082:8080"
+    volumes:
+      - n2data:/data
+
+  n3:
+    <<: *raft-node
+    command:
+      - --backend=raft
+      - --http=:8080
+      - --node-id=n3
+      - --peers=n1=http://n1:8080,n2=http://n2:8080,n3=http://n3:8080
+      - --data-dir=/data
+    ports:
+      - "8083:8080"
+    volumes:
+      - n3data:/data
+
+volumes:
+  pgdata:
+  n1data:
+  n2data:
+  n3data:
